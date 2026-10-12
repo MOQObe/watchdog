@@ -1,0 +1,46 @@
+{% import '_includes/forms' as forms %}
+
+{{ forms.autosuggestField({
+    label: 'API-sleutel',
+    instructions: 'De sleutel waarmee de Watchdog-server zich aanmeldt. Verwijs bij voorkeur naar een omgevingsvariabele (`$WATCHDOG_KEY`). Minstens ' ~ minLength ~ ' tekens.',
+    name: 'apiKey',
+    value: settings.apiKey,
+    suggestEnvVars: true,
+    warning: overridden ? 'Deze instelling wordt overschreven door `config/watchdog.php`.' : null,
+    errors: settings.getErrors('apiKey'),
+}) }}
+
+<p class="{{ keyOk ? 'light' : 'error' }}">
+    {% if keyOk %}
+        Er is een geldige sleutel ingesteld. De eindpunten staan onder <code>/actions/watchdog/api/</code>.
+    {% else %}
+        Er is geen geldige sleutel ingesteld (leeg, onbekende omgevingsvariabele of korter dan {{ minLength }} tekens). Alle aanvragen worden geweigerd met status 503.
+    {% endif %}
+</p>
+
+<hr>
+
+<h2>Koppelingen via het controlepaneel</h2>
+<p class="light">Een Watchdog-server die via de knop Verbinden in de app gekoppeld is, heeft een eigen sleutel die hier bewaard wordt (alleen als hash). Een sleutel in <code>.env</code> is dan niet nodig.</p>
+
+{% if pairings|length %}
+    <table class="data fullwidth">
+        <thead>
+            <tr><th>Naam</th><th>Goedgekeurd</th><th>Laatst gebruikt</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for pairing in pairings %}
+                <tr>
+                    <td>{{ pairing.label ?: 'Watchdog' }}</td>
+                    <td>{{ pairing.approvedAt|datetime('short') }}</td>
+                    <td>{{ pairing.lastUsedAt ? pairing.lastUsedAt|datetime('short') : 'nog niet' }}</td>
+                    <td class="thin">
+                        <button type="button" class="btn small formsubmit" data-action="watchdog/pair/revoke" data-param="id" data-value="{{ pairing.id }}" data-confirm="Deze koppeling intrekken? Watchdog kan deze site daarna niet meer uitlezen tot je opnieuw koppelt.">Intrekken</button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>Nog geen koppelingen.</p>
+{% endif %}

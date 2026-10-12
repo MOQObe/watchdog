@@ -1,0 +1,30 @@
+{% extends '_layouts/cp' %}
+{% set title = 'Watchdog koppelen' %}
+
+{% block content %}
+    <div style="max-width: 560px;">
+        {% if done %}
+            <h2>Gekoppeld</h2>
+            <p>De koppeling is goedgekeurd. Watchdog haalt de sleutel nu zelf op; ga terug naar de app, die meldt binnen enkele seconden dat de verbinding er is.</p>
+            <p class="light">Gebeurt dat niet binnen tien minuten, dan vervalt deze goedkeuring en begin je in de app opnieuw. Koppelingen intrekken kan onder Instellingen → Plugins → Watchdog-connector.</p>
+        {% elseif not ready %}
+            <h2>Eerst bijwerken</h2>
+            <p class="error">De tabel voor koppelingen ontbreekt nog. Voer <code>php craft up</code> uit op deze site en klik in Watchdog opnieuw op Verbinden.</p>
+        {% else %}
+            <h2>Deze site koppelen aan Watchdog?</h2>
+            <p>Een Watchdog-server vraagt toegang tot deze site{% if label %} als <strong>{{ label }}</strong>{% endif %}. Daarmee kan hij de instellingen uitlezen, een testmail en testinzendingen versturen en mislukte verzendingen opvragen.</p>
+
+            <p style="margin: 24px 0 8px;">Controlecode</p>
+            <p style="font-size: 34px; font-weight: 700; letter-spacing: 3px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; margin: 0 0 8px;">{{ code }}</p>
+            <p><strong>Keur alleen goed als je net zelf in de Watchdog-app op Verbinden klikte en daar dezelfde code ziet.</strong> Kreeg je deze link van iemand anders, of klopt de code niet, sluit dan deze pagina.</p>
+
+            <form method="post" accept-charset="UTF-8" style="margin-top: 24px;">
+                {{ csrfInput() }}
+                {{ actionInput('watchdog/pair/approve') }}
+                {{ hiddenInput('challenge', challenge) }}
+                {{ hiddenInput('label', label) }}
+                <button type="submit" class="btn submit">De code klopt, koppelen</button>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}
